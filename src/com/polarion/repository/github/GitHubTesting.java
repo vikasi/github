@@ -103,7 +103,7 @@ public class GitHubTesting extends HttpServlet {
         ArrayList<CommitInformation> commits = new ArrayList<CommitInformation>();
 
         req.setAttribute("commits", commits);
-        req.setAttribute("json", commitsJSON);
+        req.setAttribute("json", commitsJSON);	
         getServletContext().getRequestDispatcher("/githubtesting.jsp").forward(req, resp);
     }
     
@@ -118,9 +118,19 @@ public class GitHubTesting extends HttpServlet {
     	PrintWriter out = resp.getWriter();
         JSONObject jsonResponse = new JSONObject();
         JSONParser parser = new JSONParser();
-        
+        StringBuilder builder = new StringBuilder();
+        String aux = "";
+System.out.println("Class :"+req.getClass());
+        while ((aux = req.getReader().readLine()) != null) {
+            builder.append(aux);
+        }
+
+        String text = builder.toString();
+       System.out.println("String :"+text);
+       req.setAttribute("commits", text);
+       getServletContext().getRequestDispatcher("/githubtesting.jsp").forward(req, resp);
         try {
-        	JSONObject reqJSON = (JSONObject) parser.parse(new InputStreamReader(req.getInputStream()));
+//        	JSONObject reqJSON = (JSONObject) parser.parse(new InputStreamReader(req.getInputStream()));
         	
         } catch (Exception e) {
         	

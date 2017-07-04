@@ -13,7 +13,7 @@
 		JSONObject commetterJSON = (JSONObject) ((JSONObject) responseJSON1.get(0)).get("commit"); */
 				
 %>  
-Here is the list of commits for the repository.<br />
+Here is the list of commits for the repository .<br />
 <%--   <table border='1'>
 <tr><th>SHA</th><th>Author</th><th>Date</th></th></tr>
 <%

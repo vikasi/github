@@ -6,15 +6,15 @@
 <%@ page import="org.json.simple.JSONObject" %> 
 <%@ page import="org.json.simple.JSONArray" %> 
 
-<%-- <%
-	    ArrayList<CommitInformation> commits = (ArrayList<CommitInformation>)request.getAttribute("commits");
-		JSONObject responseJSON = (JSONObject) request.getAttribute("json");
+  <%
+	   /*  ArrayList<CommitInformation> commits = (ArrayList<CommitInformation>)request.getAttribute("commits"); */
+	/* 	JSONObject responseJSON = (JSONObject) request.getAttribute("json");
 		JSONArray responseJSON1 = (JSONArray) responseJSON.get("commits");
-		JSONObject commetterJSON = (JSONObject) ((JSONObject) responseJSON1.get(0)).get("commit");
+		JSONObject commetterJSON = (JSONObject) ((JSONObject) responseJSON1.get(0)).get("commit"); */
 				
-%> --%>
+%>  
 Here is the list of commits for the repository.<br />
-<%-- <table border='1'>
+<%--   <table border='1'>
 <tr><th>SHA</th><th>Author</th><th>Date</th></th></tr>
 <%
 
@@ -23,9 +23,11 @@ Here is the list of commits for the repository.<br />
 %>
 	<tr><td><%=commit.sha%></td><td><%=commit.author%></td><td><%=commit.date%></td></tr> 
 <% } %>
-</table>
+</table> --%>
 
 <%=
 
-commetterJSON.toString() 
-%>  --%>
+/* commits.toString()  */
+request.getAttribute("commits")
+%>  
+

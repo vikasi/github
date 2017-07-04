@@ -37,6 +37,7 @@ import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
 
 import com.polarion.core.util.ObjectUtils;
+import com.polarion.platform.internal.service.repository.LocationChangeMetaData;
 import com.polarion.platform.repository.external.AbstractExternalRepositoryConfiguration;
 import com.polarion.platform.repository.external.ExternalRepositoryCredentials;
 import com.polarion.platform.repository.external.ExternalRepositoryUtils;
@@ -54,436 +55,457 @@ import com.polarion.subterra.base.location.Location;
  */
 public class GitHubExternalRepositoryProvider implements IExternalRepositoryProvider {
 
-    private static final String ID = "github";
-    private static int COMMITS_PER_PAGE = 100; // default per page commit count
-    
+	private static final String ID = "github";
+	private static int COMMITS_PER_PAGE = 100; // default per page commit count
 
-    /* (non-Javadoc)
-     * @see com.polarion.platform.repository.external.IExternalRepositoryProvider#getProviderId()
-     */
-    @Override
-    public String getProviderId() {
-        return ID;
-    }
 
-    /* (non-Javadoc)
-     * @see com.polarion.platform.repository.external.IExternalRepositoryProvider#createEmptyConfiguration()
-     */
-    @Override
-    public IExternalRepositoryConfiguration createEmptyConfiguration() {
-        return new GitHubRepositoryConfiguration();
-    }
+	/* (non-Javadoc)
+	 * @see com.polarion.platform.repository.external.IExternalRepositoryProvider#getProviderId()
+	 */
+	@Override
+	public String getProviderId() {
+		return ID;
+	}
 
-    /* (non-Javadoc)
-     * @see com.polarion.platform.repository.external.IExternalRepositoryProvider#getRepository(com.polarion.subterra.base.data.identification.IContextId, com.polarion.platform.repository.external.IExternalRepositoryProvider.IExternalRepositoryConfiguration, com.polarion.platform.repository.external.IExternalRepositoryProvider.IExternalRepositoryCallback)
-     */
-    @Override
-    public IExternalRepository getRepository(IContextId contextId, IExternalRepositoryConfiguration configuration,
-            IExternalRepositoryCallback callback) {
-        return new GitHubRepository(contextId, (GitHubRepositoryConfiguration) configuration, callback);
-    }
+	/* (non-Javadoc)
+	 * @see com.polarion.platform.repository.external.IExternalRepositoryProvider#createEmptyConfiguration()
+	 */
+	@Override
+	public IExternalRepositoryConfiguration createEmptyConfiguration() {
+		return new GitHubRepositoryConfiguration();
+	}
 
-    private static class GitHubRepository implements IExternalRepository {
+	/* (non-Javadoc)
+	 * @see com.polarion.platform.repository.external.IExternalRepositoryProvider#getRepository(com.polarion.subterra.base.data.identification.IContextId, com.polarion.platform.repository.external.IExternalRepositoryProvider.IExternalRepositoryConfiguration, com.polarion.platform.repository.external.IExternalRepositoryProvider.IExternalRepositoryCallback)
+	 */
+	@Override
+	public IExternalRepository getRepository(IContextId contextId, IExternalRepositoryConfiguration configuration,
+			IExternalRepositoryCallback callback) {
+		return new GitHubRepository(contextId, (GitHubRepositoryConfiguration) configuration, callback);
+	}
 
-        private final IContextId contextId;
-        private GitHubRepositoryConfiguration config;
-        private final IExternalRepositoryCallback callback;
+	private static class GitHubRepository implements IExternalRepository {
 
-        /**
-         * @param contextId
-         * @param configuration
-         * @param callback
-         */
-        public GitHubRepository(IContextId contextId,
-                GitHubRepositoryConfiguration configuration,
-                IExternalRepositoryCallback callback) {
-            this.contextId = contextId;
-            config = configuration;
-            this.callback = callback;
-        }
+		private final IContextId contextId;
+		private GitHubRepositoryConfiguration config;
+		private final IExternalRepositoryCallback callback;
 
-        /* (non-Javadoc)
-         * @see com.polarion.platform.repository.external.IExternalRepositoryProvider.IExternalRepository#getContextId()
-         */
-        @Override
-        public IContextId getContextId() {
-            return contextId;
-        }
+		/**
+		 * @param contextId
+		 * @param configuration
+		 * @param callback
+		 */
+		public GitHubRepository(IContextId contextId,
+				GitHubRepositoryConfiguration configuration,
+				IExternalRepositoryCallback callback) {
+			this.contextId = contextId;
+			config = configuration;
+			this.callback = callback;
+		}
 
-        /* (non-Javadoc)
-         * @see com.polarion.platform.repository.external.IExternalRepositoryProvider.IExternalRepository#getRevisionViewURL(java.lang.String)
-         */
-        @Override
-        public String getRevisionViewURL(String revision) {
-//        	System.out.println("getRevisionViewURL"+revision);
-            if (config.getViewURL() != null) {
-                return config.getViewURL().replace("$revision$", revision);
-            }
-            return null;
-        }
+		/* (non-Javadoc)
+		 * @see com.polarion.platform.repository.external.IExternalRepositoryProvider.IExternalRepository#getContextId()
+		 */
+		@Override
+		public IContextId getContextId() {
+			return contextId;
+		}
 
-        @Override
-        public String getViewLocationDiffURL(ILocationChangeMetaData locationChangeMetaData) {
-            String locationDiffViewURL = config.getViewLocationDiffURL();
-            if (locationDiffViewURL != null) {
-                return ExternalRepositoryUtils.expandVariables(locationDiffViewURL, locationChangeMetaData, null);
-            }
-            return null;
-        }
+		/* (non-Javadoc)
+		 * @see com.polarion.platform.repository.external.IExternalRepositoryProvider.IExternalRepository#getRevisionViewURL(java.lang.String)
+		 */
+		@Override
+		public String getRevisionViewURL(String revision) {
+			//        	System.out.println("getRevisionViewURL"+revision);
+			if (config.getViewURL() != null) {
+				return config.getViewURL().replace("$revision$", revision);
+			}
+			return null;
+		}
 
-        @Override
-        public String getViewLocationURL(ILocationChangeMetaData locationChangeMetaData) {
-            String locationViewURL = config.getViewLocationURL();
-            if (locationViewURL != null) {
-                return ExternalRepositoryUtils.expandVariables(locationViewURL, locationChangeMetaData, null);
-            }
-            return null;
-        }
+		@Override
+		public String getViewLocationDiffURL(ILocationChangeMetaData locationChangeMetaData) {
+			String locationDiffViewURL = config.getViewLocationDiffURL();
+			if (locationDiffViewURL != null) {
+				return ExternalRepositoryUtils.expandVariables(locationDiffViewURL, locationChangeMetaData, null);
+			}
+			return null;
+		}
 
-        /* (non-Javadoc)
-         * @see com.polarion.platform.repository.external.IExternalRepositoryProvider.IExternalRepository#poll(com.polarion.platform.repository.external.IExternalRepositoryProvider.IExternalRepository.PollMode)
-         */
-        @Override
-        public void poll(PollMode mode) {
-            if (mode == null) {
-                throw new IllegalArgumentException("mode is null");
-            }
-            String lastRevision = callback.getRememberedState(this);
-            try {
-            	
-            	URL repoUrl = new URL(config.API_URL + "/repos/" + config.getName() + "/commits");
-            	JSONParser parser = new JSONParser();
-            	
-            	HttpsURLConnection repoConnection = (HttpsURLConnection) repoUrl.openConnection();
-            	repoConnection.setRequestMethod("GET");
-            	repoConnection.setRequestProperty("Accept", config.ACCEPT_HEADER);
-            	
-            	if (!config.getUsername().isEmpty() && !config.getPassword().isEmpty()){
-            		String basicAuth = new String(Base64.getEncoder().encode((config.getUsername() + ":" + config.getPassword()).getBytes()));
-            		repoConnection.setRequestProperty("Authorization", "Basic " + basicAuth);
-            	}
+		@Override
+		public String getViewLocationURL(ILocationChangeMetaData locationChangeMetaData) {
+			String locationViewURL = config.getViewLocationURL();
+			if (locationViewURL != null) {
+				return ExternalRepositoryUtils.expandVariables(locationViewURL, locationChangeMetaData, null);
+			}
+			return null;
+		}
 
-            	repoConnection.connect();
-            	
-            	if (repoConnection.getResponseCode()/100 >= 4){
-            		throw new RepositoryException(repoUrl + " returned response code " + repoConnection.getResponseCode());
-            	}
-            	
-            	InputStream is = repoConnection.getInputStream();
-            
-        		InputStreamReader isr = new InputStreamReader(is);
-        	 
-         
-        		JSONArray commitsArrayAllPages = (JSONArray) parser.parse(isr);
-        		JSONArray commitsArray = new JSONArray();
-        		
+		/* (non-Javadoc)
+		 * @see com.polarion.platform.repository.external.IExternalRepositoryProvider.IExternalRepository#poll(com.polarion.platform.repository.external.IExternalRepositoryProvider.IExternalRepository.PollMode)
+		 */
+		@Override
+		public void poll(PollMode mode) {
+			if (mode == null) {
+				throw new IllegalArgumentException("mode is null");
+			}
+			String lastRevision = callback.getRememberedState(this);
+			try {
+
+				URL repoUrl = new URL(config.API_URL + "/repos/" + config.getName() + "/commits");
+				JSONParser parser = new JSONParser();
+
+				HttpsURLConnection repoConnection = (HttpsURLConnection) repoUrl.openConnection();
+				repoConnection.setRequestMethod("GET");
+				repoConnection.setRequestProperty("Accept", config.ACCEPT_HEADER);
+
+				if (!config.getUsername().isEmpty() && !config.getPassword().isEmpty()){
+					String basicAuth = new String(Base64.getEncoder().encode((config.getUsername() + ":" + config.getPassword()).getBytes()));
+					repoConnection.setRequestProperty("Authorization", "Basic " + basicAuth);
+				}
+
+				repoConnection.connect();
+
+				if (repoConnection.getResponseCode()/100 >= 4){
+					throw new RepositoryException(repoUrl + " returned response code " + repoConnection.getResponseCode());
+				}
+
+				InputStream is = repoConnection.getInputStream();
+
+				InputStreamReader isr = new InputStreamReader(is);
+
+
+				JSONArray commitsArrayAllPages = (JSONArray) parser.parse(isr);
+				JSONArray commitsArray = new JSONArray();
+
 				// code to implement pagination;.
 				System.out.println("Size of json is :" + commitsArrayAllPages.size());
-			 
-					int lastCommitCount = 1;
-					boolean hasMorePgaes = true;
-					 int pageIndex = 1;
-					while (hasMorePgaes){
-					
-						URL repoUrlPagination = new URL(config.API_URL + "/repos/" + config.getName() + "/commits?per_page=" + COMMITS_PER_PAGE + "&page=" + pageIndex);
-								
-						JSONParser parserPage = new JSONParser();
-						HttpsURLConnection repoConnectionPagination = (HttpsURLConnection) repoUrlPagination
-								.openConnection();
-						repoConnectionPagination.setRequestMethod("GET");
-						repoConnectionPagination.setRequestProperty("Accept", config.ACCEPT_HEADER);
 
-						if (!config.getUsername().isEmpty() && !config.getPassword().isEmpty()) {
-							String basicAuth = new String(Base64.getEncoder()
-									.encode((config.getUsername() + ":" + config.getPassword()).getBytes()));
-							repoConnectionPagination.setRequestProperty("Authorization", "Basic " + basicAuth);
-						}
+				int lastCommitCount = 1;
+				boolean hasMorePgaes = true;
+				int pageIndex = 1;
+				while (hasMorePgaes){
 
-						repoConnection.connect();
+					URL repoUrlPagination = new URL(config.API_URL + "/repos/" + config.getName() + "/commits?per_page=" + COMMITS_PER_PAGE + "&page=" + pageIndex);
 
-						if (repoConnectionPagination.getResponseCode() / 100 >= 4) {
-							throw new RepositoryException(
-									repoUrl + " returned response code " + repoConnection.getResponseCode());
-						}
+					JSONParser parserPage = new JSONParser();
+					HttpsURLConnection repoConnectionPagination = (HttpsURLConnection) repoUrlPagination
+							.openConnection();
+					repoConnectionPagination.setRequestMethod("GET");
+					repoConnectionPagination.setRequestProperty("Accept", config.ACCEPT_HEADER);
 
-						InputStream isPage = repoConnectionPagination.getInputStream();
+					if (!config.getUsername().isEmpty() && !config.getPassword().isEmpty()) {
+						String basicAuth = new String(Base64.getEncoder()
+								.encode((config.getUsername() + ":" + config.getPassword()).getBytes()));
+						repoConnectionPagination.setRequestProperty("Authorization", "Basic " + basicAuth);
+					}
 
-						InputStreamReader isrPage = new InputStreamReader(isPage);
-						JSONArray pageCommitsArray = (JSONArray) parserPage.parse(isrPage);
+					repoConnection.connect();
 
-						commitsArray.addAll(pageCommitsArray);
-						lastCommitCount = pageCommitsArray.size();
-						 
-						System.out.println("commitsPerPage from page# :"+ pageIndex + "=" + lastCommitCount);
-						hasMorePgaes = lastCommitCount > 0 ? true : false;
-						pageIndex ++;
+					if (repoConnectionPagination.getResponseCode() / 100 >= 4) {
+						throw new RepositoryException(
+								repoUrl + " returned response code " + repoConnection.getResponseCode());
+					}
 
-					};
-				 
+					InputStream isPage = repoConnectionPagination.getInputStream();
+
+					InputStreamReader isrPage = new InputStreamReader(isPage);
+					JSONArray pageCommitsArray = (JSONArray) parserPage.parse(isrPage);
+
+					commitsArray.addAll(pageCommitsArray);
+					lastCommitCount = pageCommitsArray.size();
+
+					System.out.println("commitsPerPage from page# :"+ pageIndex + "=" + lastCommitCount);
+					hasMorePgaes = lastCommitCount > 0 ? true : false;
+					pageIndex ++;
+
+				};
+
 				// Pagination code end
-        		
-        		 
-        		Stack<JSONObject> commitStack = new Stack<JSONObject>();
-        		
-        		for (Object commit : commitsArray){
-        			JSONObject jsonCommit = (JSONObject) commit;
-                    if (mode.equals(PollMode.CONTINUE) && lastRevision != null) {
-                        if ((String) jsonCommit.get("sha") == lastRevision) {
-                            break;
-                        }
-                    }
-                    
-                    commitStack.push(jsonCommit);
-                    
-                    if (mode.equals(PollMode.FROM_CURRENT)) {
-                        break;
-                    }
-        		}
-        		
-        		while (!commitStack.isEmpty()){
-        			lastRevision = (String) commitStack.pop().get("sha");
-        			callback.revisionAdded(this, (String) lastRevision);
-        		}
 
-            } catch (IOException e) {
-                throw new RepositoryException(e);
-            } catch (ParseException e) {
+
+				Stack<JSONObject> commitStack = new Stack<JSONObject>();
+
+				for (Object commit : commitsArray){
+					JSONObject jsonCommit = (JSONObject) commit;
+					if (mode.equals(PollMode.CONTINUE) && lastRevision != null) {
+						if ((String) jsonCommit.get("sha") == lastRevision) {
+							break;
+						}
+					}
+
+					commitStack.push(jsonCommit);
+
+					if (mode.equals(PollMode.FROM_CURRENT)) {
+						break;
+					}
+				}
+
+				while (!commitStack.isEmpty()){
+					lastRevision = (String) commitStack.pop().get("sha");
+					callback.revisionAdded(this, (String) lastRevision);
+				}
+
+			} catch (IOException e) {
+				throw new RepositoryException(e);
+			} catch (ParseException e) {
 				throw new RepositoryException(e);
 			} finally {
 				callback.setRememberedState(this, lastRevision != null ? lastRevision : null);
-            }
-        }
+			}
+		}
 
-        /* (non-Javadoc)
-         * @see com.polarion.platform.repository.external.IExternalRepositoryProvider.IExternalRepository#allowsAutoPolling()
-         */
-        @Override
-        public boolean allowsAutoPolling() {
-            return true;
-        }
+		/* (non-Javadoc)
+		 * @see com.polarion.platform.repository.external.IExternalRepositoryProvider.IExternalRepository#allowsAutoPolling()
+		 */
+		@Override
+		public boolean allowsAutoPolling() {
+			return true;
+		}
 
-        /* (non-Javadoc)
-         * @see com.polarion.platform.repository.external.IExternalRepositoryProvider.IExternalRepository#startAutoPolling()
-         */
-        @Override
-        public void startAutoPolling() {
-            // empty
-        }
+		/* (non-Javadoc)
+		 * @see com.polarion.platform.repository.external.IExternalRepositoryProvider.IExternalRepository#startAutoPolling()
+		 */
+		@Override
+		public void startAutoPolling() {
+			// empty
+		}
 
-        /* (non-Javadoc)
-         * @see com.polarion.platform.repository.external.IExternalRepositoryProvider.IExternalRepository#stopAutoPolling()
-         */
-        @Override
-        public void stopAutoPolling() {
-            // empty
-        }
+		/* (non-Javadoc)
+		 * @see com.polarion.platform.repository.external.IExternalRepositoryProvider.IExternalRepository#stopAutoPolling()
+		 */
+		@Override
+		public void stopAutoPolling() {
+			// empty
+		}
 
-        /* (non-Javadoc)
-         * @see com.polarion.platform.repository.external.IExternalRepositoryProvider.IExternalRepository#getRevisionMetaData(java.lang.String)
-         */
-        @Override
-        public IRevisionMetaData getRevisionMetaData(String revision) {
+		/* (non-Javadoc)
+		 * @see com.polarion.platform.repository.external.IExternalRepositoryProvider.IExternalRepository#getRevisionMetaData(java.lang.String)
+		 */
+		@Override
+		public IRevisionMetaData getRevisionMetaData(String revision) {
 
-            try {
-            	
-            	URL repoUrl = new URL(config.API_URL + "/repos/" + config.getName() + "/commits/" + revision);
-            	JSONParser parser = new JSONParser();
-            	
-            	HttpsURLConnection repoConnection = (HttpsURLConnection) repoUrl.openConnection();
-            	repoConnection.setRequestMethod("GET");
-            	repoConnection.setRequestProperty("Accept", config.ACCEPT_HEADER);
-            	
-            	if (!config.getUsername().isEmpty() && !config.getPassword().isEmpty()){
-            		String basicAuth = new String(Base64.getEncoder().encode((config.getUsername() + ":" + config.getPassword()).getBytes()));
-            		repoConnection.setRequestProperty("Authorization", "Basic " + basicAuth);
-            	}
-            	
-            	repoConnection.connect();
-            	
-            	InputStream is = repoConnection.getInputStream();
-            	
-        		InputStreamReader isr = new InputStreamReader(is);
-        		
-        		JSONObject commit = (JSONObject) parser.parse(isr);
-        		JSONObject commitObj = (JSONObject) commit.get("commit");
-        		JSONObject authorObj = (JSONObject) commit.get("author");
-            	
-            	return new IRevisionMetaData() {
-            		
-            		@Override
-                    public String getName() {
-                        return (String) commit.get("sha");
-                    }
+			try {
 
-                    @Override
-                    public String getDescription() {
-                    	return (String) commitObj.get("message");
-                    }
+				URL repoUrl = new URL(config.API_URL + "/repos/" + config.getName() + "/commits/" + revision);
+				JSONParser parser = new JSONParser();
 
-                    @Override
-                    public Date getDate() {
-                    	JSONObject committerObj = (JSONObject) commitObj.get("committer");
-                    	return javax.xml.bind.DatatypeConverter.parseDateTime((String) committerObj.get("date")).getTime(); //using the commit date here, should we use authoring date?
-                    }
+				HttpsURLConnection repoConnection = (HttpsURLConnection) repoUrl.openConnection();
+				repoConnection.setRequestMethod("GET");
+				repoConnection.setRequestProperty("Accept", config.ACCEPT_HEADER);
 
-                    @Override
-                    public String getAuthor() {
-                        return (String) authorObj.get("login"); // we're using the author here, should we be using the committer?
-                    }
-                };
-                
-                
-            } catch (IOException e) {
-                throw new RepositoryException(e);
-            } catch (ParseException e) {
+				if (!config.getUsername().isEmpty() && !config.getPassword().isEmpty()){
+					String basicAuth = new String(Base64.getEncoder().encode((config.getUsername() + ":" + config.getPassword()).getBytes()));
+					repoConnection.setRequestProperty("Authorization", "Basic " + basicAuth);
+				}
+
+				repoConnection.connect();
+
+				InputStream is = repoConnection.getInputStream();
+
+				InputStreamReader isr = new InputStreamReader(is);
+
+				JSONObject commit = (JSONObject) parser.parse(isr);
+				JSONObject commitObj = (JSONObject) commit.get("commit");
+				JSONObject authorObj = (JSONObject) commit.get("author");
+
+				return new IRevisionMetaData() {
+
+					@Override
+					public String getName() {
+						return (String) commit.get("sha");
+					}
+
+					@Override
+					public String getDescription() {
+						return (String) commitObj.get("message");
+					}
+
+					@Override
+					public Date getDate() {
+						JSONObject committerObj = (JSONObject) commitObj.get("committer");
+						return javax.xml.bind.DatatypeConverter.parseDateTime((String) committerObj.get("date")).getTime(); //using the commit date here, should we use authoring date?
+					}
+
+					@Override
+					public String getAuthor() {
+						return (String) authorObj.get("login"); // we're using the author here, should we be using the committer?
+					}
+				};
+
+
+			} catch (IOException e) {
+				throw new RepositoryException(e);
+			} catch (ParseException e) {
 				throw new RepositoryException(e);
 			} finally {
 
-            }
+			}
 
-        }
+		}
 
-        /* (non-Javadoc)
-         * @see com.polarion.platform.repository.external.IExternalRepositoryProvider.IExternalRepository#getConfiguration()
-         */
-        @Override
-        public IExternalRepositoryConfiguration getConfiguration() {
-            return config;
-        }
+		/* (non-Javadoc)
+		 * @see com.polarion.platform.repository.external.IExternalRepositoryProvider.IExternalRepository#getConfiguration()
+		 */
+		@Override
+		public IExternalRepositoryConfiguration getConfiguration() {
+			return config;
+		}
 
-        /* (non-Javadoc)
-         * @see com.polarion.platform.repository.external.IExternalRepositoryProvider.IExternalRepository#reconfigure(com.polarion.platform.repository.external.IExternalRepositoryProvider.IExternalRepositoryConfiguration)
-         */
-        @Override
-        public void reconfigure(IExternalRepositoryConfiguration newConfiguration) {
-            config = (GitHubRepositoryConfiguration) newConfiguration;
-        }
+		/* (non-Javadoc)
+		 * @see com.polarion.platform.repository.external.IExternalRepositoryProvider.IExternalRepository#reconfigure(com.polarion.platform.repository.external.IExternalRepositoryProvider.IExternalRepositoryConfiguration)
+		 */
+		@Override
+		public void reconfigure(IExternalRepositoryConfiguration newConfiguration) {
+			config = (GitHubRepositoryConfiguration) newConfiguration;
+		}
 
-        @Override
-        public List<ILocationChangeMetaData> getChangedLocations(String revision) {
-System.out.println("getChangedLocations");
-            try {
-            	URL repoUrl = new URL(config.API_URL + "/repos/" + config.getName() + "/commits");
-//            	System.out.println("revision :"+revision);
-//            	System.out.println("config.getViewLocationURL :"+config.getViewURL());
-            	JSONParser parser = new JSONParser();
-            	
-            	HttpsURLConnection repoConnection = (HttpsURLConnection) repoUrl.openConnection();
-            	repoConnection.setRequestMethod("GET");
-            	repoConnection.setRequestProperty("Accept", config.ACCEPT_HEADER);
+		@Override
+		public List<ILocationChangeMetaData> getChangedLocations(String revision) {
+			System.out.println("getChangedLocations"+revision);
+			try {
+				URL repoUrl = new URL(config.API_URL + "/repos/" + config.getName() + "/commits/"+revision);
+				            	System.out.println("revision :"+repoUrl);
+				//            	System.out.println("config.getViewLocationURL :"+config.getViewURL());
+				JSONParser parser = new JSONParser();
 
-            	if (!config.getUsername().isEmpty() && !config.getPassword().isEmpty()){
-            		String basicAuth = new String(Base64.getEncoder().encode((config.getUsername() + ":" + config.getPassword()).getBytes()));
-            		repoConnection.setRequestProperty("Authorization", "Basic " + basicAuth);
-            	}
-            	
-            	repoConnection.connect();
-            	
-            	InputStream is = repoConnection.getInputStream();
-            	
-        		InputStreamReader isr = new InputStreamReader(is);
-            	
-            } catch (IOException e) {
-                throw new RepositoryException(e);
-            }
-            System.out.println(new ArrayList<ILocationChangeMetaData>());
-            return new ArrayList<ILocationChangeMetaData>();
-        }
+				HttpsURLConnection repoConnection = (HttpsURLConnection) repoUrl.openConnection();
+				repoConnection.setRequestMethod("GET");
+				repoConnection.setRequestProperty("Accept", config.ACCEPT_HEADER);
 
-        @SuppressWarnings("nls")
-        private ILocation getLocation(String path, String revision) {
-        	System.out.println("getLocation");
-            if (path != null && !path.startsWith("/")) {
-                path = "/" + path;
-            }
-            if (ObjectUtils.emptyString(revision)) {
-                return Location.getLocationWithRepository(config.getId(), path);
-            }
-            return Location.getLocationWithRepositoryAndRevision(config.getId(), path, revision);
-        }
+				if (!config.getUsername().isEmpty() && !config.getPassword().isEmpty()){
+					String basicAuth = new String(Base64.getEncoder().encode((config.getUsername() + ":" + config.getPassword()).getBytes()));
+					repoConnection.setRequestProperty("Authorization", "Basic " + basicAuth);
+				}
 
-        @SuppressWarnings("nls")
-        private List<ILocationChangeMetaData> getFilesInCommit()
-                throws IOException {
+				repoConnection.connect();
 
-            try {
+				
+				 
+				InputStream is = repoConnection.getInputStream();
+				InputStreamReader isr = new InputStreamReader(is);
+				try {
+				 
+					JSONObject json = (JSONObject)new JSONParser().parse(isr);
+					JSONArray files = (JSONArray) json.get("files");
+				 
+					JSONObject resultObject = (JSONObject) files.get(0);
+					String status = resultObject.get("status").toString();
+					System.out.println("status :"+status);
+					LocationChangeMetaData lcmd = new LocationChangeMetaData();
+					if(status == "modified") {
+					 lcmd.setModified(true);
+					 lcmd.setCreated(false);
+					 lcmd.setRemoved(false); 
+					 lcmd.setCopied(false);
+						
+					}
+					 
+				} catch (Exception e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+			} catch (IOException e) {
+				throw new RepositoryException(e);
+			}
+//			System.out.println(new ArrayList<ILocationChangeMetaData>());
+			return new ArrayList<ILocationChangeMetaData>();
+		}
 
-            } finally {
+		@SuppressWarnings("nls")
+		private ILocation getLocation(String path, String revision) {
+			System.out.println("getLocation");
+			if (path != null && !path.startsWith("/")) {
+				path = "/" + path;
+			}
+			if (ObjectUtils.emptyString(revision)) {
+				return Location.getLocationWithRepository(config.getId(), path);
+			}
+			return Location.getLocationWithRepositoryAndRevision(config.getId(), path, revision);
+		}
 
-            }
-            return new ArrayList<ILocationChangeMetaData>();
-        }
-    }
+		@SuppressWarnings("nls")
+		private List<ILocationChangeMetaData> getFilesInCommit()
+				throws IOException {
 
-    public static class GitHubRepositoryConfiguration extends AbstractExternalRepositoryConfiguration {
- 
-    	public final String API_URL = "https://api.github.com";
-    	public final String ACCEPT_HEADER = "application/vnd.github.v3+json";
-    	public final String BASIC_AUTH = "";
+			try {
 
-        @ExternalRepositoryCredentials(fieldType = FieldType.USERNAME, credentialId = "credentials")
-        private String username;
-        @ExternalRepositoryCredentials(fieldType = FieldType.PASSWORD, credentialId = "credentials")
-        private String password;
-        private String viewURL;
-        private String viewLocationURL;
-        private String viewLocationDiffURL;
+			} finally {
 
-        /* (non-Javadoc)
-         * @see com.polarion.platform.repository.external.AbstractExternalRepositoryConfiguration#getProviderId()
-         */
-        @Override
-        public String getProviderId() {
-            return ID;
-        }
-        
-        public String getUsername() {
-        	if (username != null){
-        		return username;
-        	} else return "";
-        }
+			}
+			return new ArrayList<ILocationChangeMetaData>();
+		}
+	}
 
-        public void setUsername(String username) {
-            this.username = username;
-        }
+	public static class GitHubRepositoryConfiguration extends AbstractExternalRepositoryConfiguration {
 
-        public String getPassword() {
-            return password != null ? password : "";
-        }
+		public final String API_URL = "https://api.github.com";
+		public final String ACCEPT_HEADER = "application/vnd.github.v3+json";
+		public final String BASIC_AUTH = "";
 
-        public void setPassword(String password) {
-            this.password = password;
-        }
+		@ExternalRepositoryCredentials(fieldType = FieldType.USERNAME, credentialId = "credentials")
+		private String username;
+		@ExternalRepositoryCredentials(fieldType = FieldType.PASSWORD, credentialId = "credentials")
+		private String password;
+		private String viewURL;
+		private String viewLocationURL;
+		private String viewLocationDiffURL;
 
-        /**
-         * @return the viewURL
-         */
-        public String getViewURL() {
-            return viewURL;
-        }
+		/* (non-Javadoc)
+		 * @see com.polarion.platform.repository.external.AbstractExternalRepositoryConfiguration#getProviderId()
+		 */
+		@Override
+		public String getProviderId() {
+			return ID;
+		}
 
-        /**
-         * @param viewURL the viewURL to set
-         */
-        public void setViewURL(String viewURL) {
-            this.viewURL = viewURL;
-        }
+		public String getUsername() {
+			if (username != null){
+				return username;
+			} else return "";
+		}
 
-        public String getViewLocationURL() {
-            return viewLocationURL;
-        }
+		public void setUsername(String username) {
+			this.username = username;
+		}
 
-        public void setViewLocationURL(String viewLocationURL) {
-            this.viewLocationURL = viewLocationURL;
-        }
+		public String getPassword() {
+			return password != null ? password : "";
+		}
 
-        public String getViewLocationDiffURL() {
-            return viewLocationDiffURL;
-        }
+		public void setPassword(String password) {
+			this.password = password;
+		}
 
-        public void setViewLocationDiffURL(String viewLocationDiffURL) {
-            this.viewLocationDiffURL = viewLocationDiffURL;
-        }
+		/**
+		 * @return the viewURL
+		 */
+		public String getViewURL() {
+			return viewURL;
+		}
 
-    }
+		/**
+		 * @param viewURL the viewURL to set
+		 */
+		public void setViewURL(String viewURL) {
+			this.viewURL = viewURL;
+		}
+
+		public String getViewLocationURL() {
+			return viewLocationURL;
+		}
+
+		public void setViewLocationURL(String viewLocationURL) {
+			this.viewLocationURL = viewLocationURL;
+		}
+
+		public String getViewLocationDiffURL() {
+			return viewLocationDiffURL;
+		}
+
+		public void setViewLocationDiffURL(String viewLocationDiffURL) {
+			this.viewLocationDiffURL = viewLocationDiffURL;
+		}
+
+	}
 }

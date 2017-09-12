@@ -3,7 +3,6 @@
  * All rights reserved.
  * Email: dev@polarion.com
  *
- *
  * Copyright (C) 2004-2014 Polarion Software
  * All Rights Reserved.  No use, copying or distribution of this
  * work may be made except in accordance with a valid license

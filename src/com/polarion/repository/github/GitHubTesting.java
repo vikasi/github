@@ -43,7 +43,8 @@ import org.json.simple.parser.ParseException;
 /**
  * This is the servlet which counts workload of current user. The code here calculates the workload
  * which is then rendered by currentUserWorkload.jsp.
- * 
+ *
+ *
  * The time is count according to these rules:
  *          1) time to resolve work item (TTRWI) = remaining estimation time (RMT)
  *          2) if RMT is not set, then TTRWI = initial estimate time (IET)
